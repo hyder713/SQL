@@ -1,0 +1,95 @@
+----#1
+
+select studies.nct_id, conditions.name, overall_status,city, country, studies.enrollment, intervention_type, criteria
+from ctgov.studies
+join ctgov.conditions on studies.nct_id = conditions.nct_id 
+join ctgov.eligibilities on studies.nct_id = eligibilities.nct_id
+join ctgov.facilities on studies.nct_id = facilities.nct_id
+join ctgov.interventions on studies.nct_id = interventions.nct_id
+where conditions.name = 'Neoplasms' AND overall_status= 'Completed' AND enrollment_type = 'Actual'
+
+
+----#2
+select event_type as adverse_reaction , non_inferiority_type
+from ctgov.studies
+join ctgov.conditions on studies.nct_id = conditions.nct_id 
+join ctgov.eligibilities on studies.nct_id = eligibilities.nct_id
+join ctgov.facilities on studies.nct_id = facilities.nct_id
+join ctgov.interventions on studies.nct_id = interventions.nct_id
+join ctgov.reported_events on studies.nct_id= reported_events.nct_id
+join ctgov.outcome_analyses on studies.nct_id = outcome_analyses.nct_id
+where conditions.name = 'Neoplasms' AND overall_status= 'Completed' AND enrollment_type = 'Actual' AND event_type = 'serious'
+order by non_inferiority_type
+
+
+---#3
+select max(studies.nct_id) as study_id, studies.enrollment as number_of_participants, MAX(param_value) as number_complete_response
+from ctgov.studies
+join ctgov.conditions on studies.nct_id = conditions.nct_id 
+join ctgov.interventions on studies.nct_id = interventions.nct_id
+join ctgov.outcome_measurements on studies.nct_id = outcome_measurements.nct_id
+where conditions.name = 'Neoplasms' AND overall_status= 'Completed' AND enrollment_type = 'Actual' AND param_type='Count of Participants'
+and param_value_num is not null
+group by studies.nct_id, studies.enrollment
+order by max(param_value) desc, studies.enrollment
+limit 1
+
+---#4
+
+select Count(studies.nct_id) as number_of_trails_between_01_2005_AND_01_2010
+from ctgov.studies
+join ctgov.conditions on studies.nct_id = conditions.nct_id 
+join ctgov.eligibilities on studies.nct_id = eligibilities.nct_id
+join ctgov.facilities on studies.nct_id = facilities.nct_id
+join ctgov.interventions on studies.nct_id = interventions.nct_id
+where conditions.name = 'Neoplasms' AND overall_status= 'Completed' AND enrollment_type = 'Actual' 
+AND (start_date >= '2005-01-01':: date AND  completion_date< ('2010-01-01'::date +'1 day':: interval))
+
+---#5
+select state, count(studies.nct_id)
+from ctgov.studies
+join ctgov.conditions on studies.nct_id = conditions.nct_id 
+join ctgov.eligibilities on studies.nct_id = eligibilities.nct_id
+join ctgov.facilities on studies.nct_id = facilities.nct_id
+join ctgov.interventions on studies.nct_id = interventions.nct_id
+where conditions.name = 'Neoplasms' AND overall_status= 'Completed' AND enrollment_type = 'Actual' ANd country= 'United States'
+group by state
+
+
+
+
+----table exploration
+select *
+from ctgov.eligibilities
+
+select *
+from ctgov.conditions
+where name= 'Neoplasms'
+
+select * 
+from ctgov.browse_conditions
+where mesh_term = 'Neoplasms'
+
+select *
+from ctgov.facilities
+
+select enrollment_type
+from ctgov.studies
+
+select *
+from ctgov.reported_events
+
+select *
+from ctgov.outcome_analyses
+
+select * 
+from ctgov.outcome_measurements
+where nct_id = 'NCT00940498'
+
+
+select *
+from ctgov.studies
+
+select start_date, completion_date
+from ctgov.studies
+where start_date >= '2005-01-01':: date AND  completion_date< ('2009-01-01'::date +'1 day':: interval)
